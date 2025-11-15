@@ -3,24 +3,17 @@ package ru.zaikin.retrofitmvvm.adapter
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import ru.zaikin.retrofitmvvm.R
 import ru.zaikin.retrofitmvvm.databinding.MovieItemBinding
 import ru.zaikin.retrofitmvvm.model.Movie
 import ru.zaikin.retrofitmvvm.ui.MovieDetailsActivity
+import ru.zaikin.retrofitmvvm.R
 
-class MovieAdapter : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
-
-    private val movies = mutableListOf<Movie>()
-
-    fun submitList(newMovies: List<Movie>) {
-        movies.apply {
-            clear()
-            addAll(newMovies)
-        }
-        notifyDataSetChanged()
-    }
+class MoviePagingAdapter :
+    PagingDataAdapter<Movie, MoviePagingAdapter.MovieViewHolder>(MOVIE_COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val binding = MovieItemBinding.inflate(
@@ -32,10 +25,8 @@ class MovieAdapter : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
-        holder.bind(movies[position])
+        getItem(position)?.let { holder.bind(it) }
     }
-
-    override fun getItemCount(): Int = movies.size
 
     inner class MovieViewHolder(private val binding: MovieItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -56,6 +47,16 @@ class MovieAdapter : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
                     root.context.startActivity(intent)
                 }
             }
+        }
+    }
+
+    companion object {
+        private val MOVIE_COMPARATOR = object : DiffUtil.ItemCallback<Movie>() {
+            override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean =
+                oldItem.id == newItem.id
+
+            override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean =
+                oldItem == newItem
         }
     }
 }

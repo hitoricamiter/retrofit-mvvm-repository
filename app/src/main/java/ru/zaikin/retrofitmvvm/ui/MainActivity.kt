@@ -4,40 +4,42 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.zaikin.retrofitmvvm.R
-import ru.zaikin.retrofitmvvm.adapter.MovieAdapter
 import ru.zaikin.retrofitmvvm.databinding.ActivityMainBinding
 import ru.zaikin.retrofitmvvm.viewmodel.MainActivityViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import ru.zaikin.retrofitmvvm.adapter.MoviePagingAdapter
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var adapter: MovieAdapter
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainActivityViewModel
+    private lateinit var adapter: MoviePagingAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         viewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
 
-        adapter = MovieAdapter()
+        adapter = MoviePagingAdapter()
         binding.recyclerView.adapter = adapter
-        binding.recyclerView.itemAnimator = DefaultItemAnimator()
         setRecyclerLayout()
 
         binding.swiperefresh.setColorSchemeResources(R.color.black)
         binding.swiperefresh.setOnRefreshListener {
-            fetchMovies()
+            adapter.refresh()
         }
 
         observeMovies()
-        fetchMovies()
     }
 
     private fun setRecyclerLayout() {
@@ -46,16 +48,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeMovies() {
-        viewModel.getAllMovies(getString(R.string.api_key)).observe(this) { movieApiResponse ->
-            movieApiResponse?.results?.let { movies ->
-                adapter.submitList(movies)
-                binding.swiperefresh.isRefreshing = false
+        val apiKey = getString(R.string.api_key)
+
+        lifecycleScope.launch {
+            viewModel.getMoviesPaging(apiKey).collectLatest { pagingData ->
+                adapter.submitData(pagingData)
             }
         }
-    }
 
-    private fun fetchMovies() {
-        binding.swiperefresh.isRefreshing = true
-        viewModel.getAllMovies(getString(R.string.api_key))
+        adapter.addLoadStateListener { loadState ->
+            binding.swiperefresh.isRefreshing = loadState.refresh is LoadState.Loading
+        }
     }
 }

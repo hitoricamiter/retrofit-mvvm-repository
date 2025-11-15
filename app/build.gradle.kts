@@ -49,6 +49,7 @@ android {
 }
 
 val lifecycle_version = "2.9.4"
+val paging_version = "3.3.6"
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -69,6 +70,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${lifecycle_version}")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:${lifecycle_version}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${lifecycle_version}")
+    implementation("androidx.paging:paging-runtime:$paging_version")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
