@@ -32,6 +32,11 @@ android {
         }
     }
 
+    buildFeatures {
+        dataBinding = true
+    }
+
+
 
 
     compileOptions {
@@ -42,6 +47,8 @@ android {
         jvmTarget = "11"
     }
 }
+
+val lifecycle_version = "2.9.4"
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -58,6 +65,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${lifecycle_version}")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:${lifecycle_version}")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${lifecycle_version}")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
